@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "432686352149",
+    "project_id": "preparationhotspot-92b87",
+    "storage_bucket": "preparationhotspot-92b87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432686352149:android:2d083be3d65c8fd8320b1c",
+        "android_client_info": {
+          "package_name": "com.example.preparationhotspot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432686352149-ehokn7ndu6gpeq35h13ku0c3a7udufnl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.preparationhotspot",
+            "certificate_hash": "5399685d0c503bde8670a1d2430b4174120e5ccc"
+          }
+        },
+        {
+          "client_id": "432686352149-459c98ht3srkdssd1c5dfa67u8i4u3ls.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5YZVtk5cEQolNy7ZpTtiLY2aMhknqL7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432686352149-459c98ht3srkdssd1c5dfa67u8i4u3ls.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "432686352149-4613169j38n6npikhqah4dnu5jtu0g1p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.preparationhotspot.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432686352149:android:1155be17fa0da845320b1c",
+        "android_client_info": {
+          "package_name": "com.preparationhotspot.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432686352149-c6qup10c7dpi6l906obt8u3dg83bauv7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.preparationhotspot.app",
+            "certificate_hash": "5399685d0c503bde8670a1d2430b4174120e5ccc"
+          }
+        },
+        {
+          "client_id": "432686352149-459c98ht3srkdssd1c5dfa67u8i4u3ls.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA5YZVtk5cEQolNy7ZpTtiLY2aMhknqL7g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432686352149-459c98ht3srkdssd1c5dfa67u8i4u3ls.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "432686352149-4613169j38n6npikhqah4dnu5jtu0g1p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.preparationhotspot.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

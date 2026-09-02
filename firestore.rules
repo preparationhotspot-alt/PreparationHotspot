@@ -1,0 +1,159 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // Fields only Cloud Functions (Admin SDK) are allowed to change.
+    function serverOwnedUserFields() {
+      return [
+        'overallAccuracy', 'overallProgress', 'questionsAttempted',
+        'questionsCorrect', 'questionsIncorrect', 'testsAttempted',
+        'assessmentCompleted', 'preparationLevel'
+      ];
+    }
+
+    // A `get()` on a document that doesn't exist evaluates `resource` as
+    // null -- referencing `resource.data` in that case throws and Firestore
+    // reports it to the client as PERMISSION_DENIED instead of "not found".
+    // Every rule below that inspects `resource.data` is guarded with
+    // `resource == null ||` so a missing document just reads as empty.
+
+    // ---------- Users ----------
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+         !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(serverOwnedUserFields()));
+      allow delete: if false;
+    }
+
+    // ---------- Content tree: exams -> subjects -> chapters -> topics ----------
+    match /exams/{examId} {
+      allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+
+      match /subjects/{subjectId} {
+        allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+        allow write: if isAdmin();
+
+        match /chapters/{chapterId} {
+          allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+          allow write: if isAdmin();
+
+          match /topics/{topicId} {
+            allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+            allow write: if isAdmin();
+          }
+        }
+      }
+    }
+
+    match /diagnostic_config/{examId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------- Notes ----------
+    match /notes/{noteId} {
+      allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------- Questions: never exposed with answers to students directly.
+    // Direct reads are admin-only; students receive sanitized questions via
+    // Cloud Functions (generateDiagnosticAssessment / getPracticeQuestions). ----------
+    match /questions/{questionId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------- Attempts: client may create its own, never edit/delete.
+    // Cloud Functions grade and finalize these via the Admin SDK. ----------
+    match /diagnostic_attempts/{attemptId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /mock_attempts/{attemptId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /practice_sessions/{sessionId} {
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow update, delete: if isAdmin();
+    }
+
+    match /mock_tests/{testId} {
+      allow read: if resource == null || resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ---------- Server-computed aggregates: read-only for owner ----------
+    match /user_performance/{docId} {
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /study_plans/{planId} {
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow write: if isAdmin();
+
+      match /items/{itemId} {
+        allow read: if isSignedIn() &&
+          exists(/databases/$(database)/documents/study_plans/$(planId)) &&
+          get(/databases/$(database)/documents/study_plans/$(planId)).data.userId == request.auth.uid ||
+          isAdmin();
+        allow write: if isAdmin();
+      }
+    }
+
+    // ---------- User-owned utility collections ----------
+    match /bookmarks/{bookmarkId} {
+      allow read, delete: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid);
+    }
+
+    match /reports/{reportId} {
+      allow read: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
